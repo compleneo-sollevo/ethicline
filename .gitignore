@@ -1,0 +1,47 @@
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+docker-compose.override.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+backend/.venv/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.egg-info/
+dist/
+build/
+
+# Node / Frontend
+node_modules/
+.next/
+frontend/.next/
+frontend/out/
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+docs/.obsidian/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres_data/
+
+# Logs
+*.log
+logs/

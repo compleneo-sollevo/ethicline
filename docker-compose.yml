@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:17
+    container_name: ethicline-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ethicline_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ethicline_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-ethicline}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ethicline_user} -d ${POSTGRES_DB:-ethicline}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ethicline-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ethicline_user}:${POSTGRES_PASSWORD:-ethicline_dev_password}@db:5432/${POSTGRES_DB:-ethicline}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-in-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://ethicline.localhost}
+    volumes:
+      - ./backend/src:/app/src
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.ethicline-backend.rule=Host(`ethicline-api.localhost`)"
+      - "traefik.http.routers.ethicline-backend.entrypoints=web"
+      - "traefik.http.services.ethicline-backend.loadbalancer.server.port=8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: http://ethicline-api.localhost
+    container_name: ethicline-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - default
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.ethicline-frontend.rule=Host(`ethicline.localhost`)"
+      - "traefik.http.routers.ethicline-frontend.entrypoints=web"
+      - "traefik.http.services.ethicline-frontend.loadbalancer.server.port=3000"
+
+volumes:
+  postgres_data:
+
+networks:
+  traefik:
+    external: true
