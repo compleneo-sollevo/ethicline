@@ -16,6 +16,33 @@ related: [architecture.md, auth/02-login-flow.md]
 - `*.localhost` wird vom OS automatisch auf 127.0.0.1 aufgelöst — keine
   `/etc/hosts`-Einträge nötig.
 
+## Postgres-Host-Port 5437
+
+`.env.example` setzt `POSTGRES_PORT=5437` anstatt dem Postgres-Default `5432`.
+
+**Warum:** Auf Marcels Haupt-Dev-Rechner laufen bereits mehrere Postgres-
+Container nebeneinander:
+
+| Projekt | Host-Port |
+|---|---|
+| `mh-postgres` (mh-sales-forecasting) | 5432 |
+| `up2date-postgres` | 5433 |
+| `compleneo-postgres` | 5434 |
+| `jash-postgres` | 5436 |
+| **`ethicline-postgres`** | **5437** |
+
+Innerhalb des Compose-Netzwerks kommuniziert das Backend weiterhin mit
+`db:5432` (Container-interner Port). Nur die Host-Exposition (für
+`psql`/GUI-Clients) nutzt 5437:
+
+```bash
+psql -h localhost -p 5437 -U ethicline_user -d ethicline
+```
+
+Wenn du auf einer anderen Maschine klonst und 5432 frei ist: einfach
+`POSTGRES_PORT=5432` in deiner lokalen `.env` setzen, aber **nicht ins
+Repo committen** (`.env` steht sowieso in `.gitignore`).
+
 ## Erststart
 
 ```bash

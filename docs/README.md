@@ -7,13 +7,16 @@ tags: [docs, navigation, index, uebersicht, ethicline]
 
 # Dokumentation — ethicLine
 
+**Repo:** <https://github.com/compleneo-sollevo/ethicline> ·
+**Template-Vorfahre:** <https://github.com/compleneo-sollevo/app-shell-template>
+
 ## Architektur & Setup
 
 | Dokument | Beschreibung |
 |----------|-------------|
 | [architecture.md](./architecture.md) | System-Architektur, Tech-Stack, Datenfluss |
-| [setup.md](./setup.md) | Lokales Dev-Environment starten |
-| [roadmap.md](./roadmap.md) | Geplante Features, offene Themen |
+| [setup.md](./setup.md) | Lokales Dev-Environment starten (inkl. Postgres-Port 5437) |
+| [roadmap.md](./roadmap.md) | Session-Log + Offene TODOs (ethicLine + Template-Feedback-Loop) |
 
 ## Auth & Sicherheit
 
